@@ -69,21 +69,11 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     addr.sin_port = 0;
 
     if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, 
-            (char*) &reuse, (socklen_t) sizeof(*reuse))) == -1) {
-        e = WSAGetLastError();
-    	closesocket(listener);
-        WSASetLastError(e);
-        return SOCKET_ERROR;
-    }
-    e = bind(listener, (const struct sockaddr*) &addr, sizeof(addr));
-    if (e == SOCKET_ERROR) {
-        e = WSAGetLastError();
-    	closesocket(listener);
-        WSASetLastError(e);
-        return SOCKET_ERROR;
-    }
-    e = getsockname(listener, (struct sockaddr*) &addr, &addrlen);
-    if (e == SOCKET_ERROR) {
+               (char*) &reuse, (socklen_t) sizeof(*reuse)) == -1 ||
+           bind(listener, (const struct sockaddr*) &addr, sizeof(addr)) 
+               == SOCKET_ERROR ||
+           getsockname(listener, (struct sockaddr*) &addr, &addrlen) 
+               == SOCKET_ERROR) {
         e = WSAGetLastError();
     	closesocket(listener);
         WSASetLastError(e);
