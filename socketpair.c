@@ -58,7 +58,6 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
       return SOCKET_ERROR;
     }
 
-    socks[0] = socks[1] = INVALID_SOCKET;
     if ((listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))
 	    == INVALID_SOCKET) 
         return SOCKET_ERROR;
@@ -68,29 +67,34 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     addr.sin_port = 0;
 
-    if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, 
-               (char*) &reuse, (socklen_t) sizeof(*reuse)) == -1 ||
-           bind(listener, (const struct sockaddr*) &addr, sizeof(addr)) 
-               == SOCKET_ERROR ||
-           getsockname(listener, (struct sockaddr*) &addr, &addrlen) 
-               == SOCKET_ERROR) {
-        e = WSAGetLastError();
-    	closesocket(listener);
-        WSASetLastError(e);
-        return SOCKET_ERROR;
-    }
-
+    socks[0] = socks[1] = INVALID_SOCKET;
     do {
-        if (listen(listener, 1) == SOCKET_ERROR)                      break;
+        if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, 
+               (char*) &reuse, (socklen_t) sizeof(*reuse)) == -1)
+            break;
+        if  (bind(listener, (const struct sockaddr*) &addr, sizeof(addr)) 
+                == SOCKET_ERROR)
+            break;
+        if  (getsockname(listener, (struct sockaddr*) &addr, &addrlen) 
+                == SOCKET_ERROR)
+            break;
+        if (listen(listener, 1) == SOCKET_ERROR)
+            break;
         if ((socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags))
-                == INVALID_SOCKET)                                    break;
-        if (connect(socks[0], (const struct sockaddr*) &addr,
-                    sizeof(addr)) == SOCKET_ERROR)                    break;
+                == INVALID_SOCKET)
+            break;
+        if (connect(socks[0], (const struct sockaddr*) &addr, sizeof(addr)) 
+                == SOCKET_ERROR)
+            break;
         if ((socks[1] = accept(listener, NULL, NULL))
-                == INVALID_SOCKET)                                    break;
+                == INVALID_SOCKET)
+            break;
+
         closesocket(listener);
         return 0;
+
     } while (0);
+
     e = WSAGetLastError();
     closesocket(listener);
     closesocket(socks[0]);
