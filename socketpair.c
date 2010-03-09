@@ -46,10 +46,13 @@
 
 int dumb_socketpair(SOCKET socks[2], int make_overlapped)
 {
-    struct sockaddr_in addr;
+    union {
+       struct sockaddr_in inaddr;
+       struct sockaddr addr;
+    } a;
     SOCKET listener;
     int e;
-    int addrlen = sizeof(addr);
+    socklen_t addrlen = sizeof(a.inaddr);
     DWORD flags = (make_overlapped ? WSA_FLAG_OVERLAPPED : 0);
     int reuse = 1;
 
@@ -58,36 +61,33 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
       return SOCKET_ERROR;
     }
 
-    if ((listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP))
-	    == INVALID_SOCKET) 
+    listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (listener == INVALID_SOCKET) 
         return SOCKET_ERROR;
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    addr.sin_port = 0;
+    memset(&a, 0, sizeof(a));
+    a.inaddr.sin_family = AF_INET;
+    a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    a.inaddr.sin_port = 0; 
 
     socks[0] = socks[1] = INVALID_SOCKET;
     do {
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, 
-               (char*) &reuse, (socklen_t) sizeof(*reuse)) == -1)
+               (char*) &reuse, (socklen_t) sizeof(reuse)) == -1)
             break;
-        if  (bind(listener, (const struct sockaddr*) &addr, sizeof(addr)) 
-                == SOCKET_ERROR)
+        if  (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
-        if  (getsockname(listener, (struct sockaddr*) &addr, &addrlen) 
-                == SOCKET_ERROR)
+        if  (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR)
             break;
         if (listen(listener, 1) == SOCKET_ERROR)
             break;
-        if ((socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags))
-                == INVALID_SOCKET)
+        socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags);
+        if (socks[0] == INVALID_SOCKET)
             break;
-        if (connect(socks[0], (const struct sockaddr*) &addr, sizeof(addr)) 
-                == SOCKET_ERROR)
+        if (connect(socks[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
-        if ((socks[1] = accept(listener, NULL, NULL))
-                == INVALID_SOCKET)
+        socks[1] = accept(listener, NULL, NULL);
+        if (socks[1] == INVALID_SOCKET)
             break;
 
         closesocket(listener);
