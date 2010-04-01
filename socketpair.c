@@ -9,6 +9,8 @@
  */
 
 /* Changes:
+ * 2010-03-31:
+ *   set addr to 127.0.0.1 because win32 getsockname does not always set it.
  * 2010-02-25:
  *   set SO_REUSEADDR option to avoid leaking some windows resource.
  *   Windows System Error 10049, "Event ID 4226 TCP/IP has reached 
@@ -77,8 +79,14 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
             break;
         if  (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
-        if  (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR)
+        memset(a, 0, sizeof(a));
+        if  (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR &&
+             WSAGetLastError() != WSAEINVAL)
             break;
+        // win32 getsockname sometimes clobbers this
+        // ( http://msdn.microsoft.com/en-us/library/ms738543.aspx ):
+        a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        a.inaddr.sin_family = AF_INET;
         if (listen(listener, 1) == SOCKET_ERROR)
             break;
         socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags);
