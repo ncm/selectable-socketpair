@@ -1,4 +1,4 @@
 Windows XP doesn't provide POSIX socketpair(2).  Typical workarounds
-based on pipes can't be used with select(2).  This socketpair is not
-named "socketpair" because it offers an extra argument needed for use 
-in Windows code, but the option is ignored on unixy systems.
+based on pipes can't be used with win32 select(2).  This socketpair is 
+named a little differently because it offers an extra argument needed 
+for use in Windows code.  The extra argument is ignored on unixy systems.

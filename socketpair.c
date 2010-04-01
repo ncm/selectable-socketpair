@@ -79,7 +79,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
             break;
         if  (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
-        memset(a, 0, sizeof(a));
+        memset(&a, 0, sizeof(a));
         if  (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR &&
              WSAGetLastError() != WSAEINVAL)
             break;
