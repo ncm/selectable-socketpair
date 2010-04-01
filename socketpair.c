@@ -1,5 +1,5 @@
 /* socketpair.c
- * Copyright 2007 by Nathan C. Myers <ncm@cantrip.org>; some rights reserved.
+ * Copyright 2007, 2010 by Nathan C. Myers <ncm@cantrip.org>
  * This code is Free Software.  It may be copied freely, in original or 
  * modified form, subject only to the restrictions that (1) the author is
  * relieved from all responsibilities for any use for any purpose, and (2)
@@ -79,21 +79,24 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
             break;
         if  (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
+
         memset(&a, 0, sizeof(a));
-        if  (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR &&
-             WSAGetLastError() != WSAEINVAL)
+        if  (getsockname(listener, &a.addr, &addrlen) == SOCKET_ERROR)
             break;
-        // win32 getsockname sometimes clobbers this
-        // ( http://msdn.microsoft.com/en-us/library/ms738543.aspx ):
+        // win32 getsockname may only set the port number, p=0.0005.
+        // ( http://msdn.microsoft.com/library/ms738543.aspx ):
         a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
         a.inaddr.sin_family = AF_INET;
+
         if (listen(listener, 1) == SOCKET_ERROR)
             break;
+
         socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags);
         if (socks[0] == INVALID_SOCKET)
             break;
         if (connect(socks[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
+
         socks[1] = accept(listener, NULL, NULL);
         if (socks[1] == INVALID_SOCKET)
             break;
