@@ -1,0 +1,3 @@
+Files in this directory are only used for "make dummy" on *nix.  
+They are used only to check for gross coding errors when no win32 
+build environment is immediately available.
