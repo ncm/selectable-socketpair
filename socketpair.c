@@ -121,12 +121,13 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
 #else
 int dumb_socketpair(int socks[2], int dummy)
 {
-    (void) dummy;
     if (socks == 0) {
 		set_errno(EINVAL);
 		return -1;
     }
-    socks[0] = socks[1] = -1;
-    return socketpair(AF_LOCAL, SOCK_STREAM, 0, socks);
+    dummy = socketpair(AF_LOCAL, SOCK_STREAM, 0, socks);
+	if (dummy)
+	    socks[0] = socks[1] = -1;
+	return dummy;
 }
 #endif
