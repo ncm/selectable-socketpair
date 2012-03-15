@@ -9,6 +9,9 @@
  */
 
 /* Changes:
+ * 2012-03-15:
+ *   always init the socks[] to -1/INVALID_SOCKET on error, both on Win32/64 
+ *   and UNIX/other platforms
  * 2010-03-31:
  *   set addr to 127.0.0.1 because win32 getsockname does not always set it.
  * 2010-02-25:
@@ -34,6 +37,7 @@
 #else
 # include <sys/types.h>
 # include <sys/socket.h>
+# include <errno.h>
 #endif
 
 #ifdef WIN32
@@ -62,6 +66,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
       WSASetLastError(WSAEINVAL);
       return SOCKET_ERROR;
     }
+    socks[0] = socks[1] = INVALID_SOCKET;
 
     listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listener == INVALID_SOCKET) 
@@ -72,7 +77,6 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     a.inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     a.inaddr.sin_port = 0; 
 
-    socks[0] = socks[1] = INVALID_SOCKET;
     do {
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, 
                (char*) &reuse, (socklen_t) sizeof(reuse)) == -1)
@@ -111,12 +115,18 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     closesocket(socks[0]);
     closesocket(socks[1]);
     WSASetLastError(e);
+    socks[0] = socks[1] = INVALID_SOCKET;
     return SOCKET_ERROR;
 }
 #else
 int dumb_socketpair(int socks[2], int dummy)
 {
     (void) dummy;
+    if (socks == 0) {
+		set_errno(EINVAL);
+		return -1;
+    }
+    socks[0] = socks[1] = -1;
     return socketpair(AF_LOCAL, SOCK_STREAM, 0, socks);
 }
 #endif
