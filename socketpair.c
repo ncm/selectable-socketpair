@@ -1,14 +1,31 @@
 /* socketpair.c
- * Copyright 2007, 2010 by Nathan C. Myers <ncm@cantrip.org>
- * This code is Free Software.  It may be copied freely, in original or 
- * modified form, subject only to the restrictions that (1) the author is
- * relieved from all responsibilities for any use for any purpose, and (2)
- * this copyright notice must be retained, unchanged, in its entirety.  If
- * for any reason the author might be held responsible for any consequences
- * of copying or use, license is withheld.  
+Copyright 2007, 2010 by Nathan C. Myers <ncm@cantrip.org>
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+    
+    Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+    The name of the author must not be used to endorse or promote products derived 
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /* Changes:
+ * 2013-07-18: Change to BSD 3-clause license
  * 2010-03-31:
  *   set addr to 127.0.0.1 because win32 getsockname does not always set it.
  * 2010-02-25:
