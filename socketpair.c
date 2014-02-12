@@ -89,7 +89,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     socks[0] = socks[1] = -1;
 
     listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (listener == INVALID_SOCKET)
+    if (listener == -1)
         return SOCKET_ERROR;
 
     memset(&a, 0, sizeof(a));
@@ -116,7 +116,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
             break;
 
         socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags);
-        if (socks[0] == INVALID_SOCKET)
+        if (socks[0] == -1)
             break;
         if (connect(socks[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
