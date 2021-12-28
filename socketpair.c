@@ -89,7 +89,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     socks[0] = socks[1] = -1;
 
     listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (listener == -1)
+    if (listener == INVALID_SOCKET)
         return SOCKET_ERROR;
 
     memset(&a, 0, sizeof(a));
@@ -99,7 +99,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
 
     for (;;) {
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
-               (char*) &reuse, (socklen_t) sizeof(reuse)) == -1)
+               (char*) &reuse, (socklen_t) sizeof(reuse)) == SOCKET_ERROR)
             break;
         if  (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
@@ -116,13 +116,13 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
             break;
 
         socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags);
-        if (socks[0] == -1)
+        if (socks[0] == INVALID_SOCKET)
             break;
         if (connect(socks[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
 
         socks[1] = accept(listener, NULL, NULL);
-        if (socks[1] == -1)
+        if (socks[1] == INVALID_SOCKET)
             break;
 
         closesocket(listener);
