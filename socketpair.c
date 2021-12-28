@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 
 #ifdef WIN32
-# include <ws2tcpip.h>  /* socklen_t, et al (MSVC20xx) */
+# include <winsock2.h>
 # include <windows.h>
 # include <io.h>
 #else
@@ -77,16 +77,16 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
        struct sockaddr addr;
     } a;
     SOCKET listener;
-    int e;
-    socklen_t addrlen = sizeof(a.inaddr);
+    int addrlen = (int) sizeof(a.inaddr);
     DWORD flags = (make_overlapped ? WSA_FLAG_OVERLAPPED : 0);
-    int reuse = 1;
+    DWORD reuse = 1;
+    int e;
 
     if (socks == 0) {
       WSASetLastError(WSAEINVAL);
       return SOCKET_ERROR;
     }
-    socks[0] = socks[1] = -1;
+    socks[0] = socks[1] = INVALID_SOCKET;
 
     listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listener == INVALID_SOCKET)
@@ -99,9 +99,9 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
 
     for (;;) {
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR,
-               (char*) &reuse, (socklen_t) sizeof(reuse)) == SOCKET_ERROR)
+               (const char*) &reuse, (int) sizeof(reuse)) == SOCKET_ERROR)
             break;
-        if  (bind(listener, &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
+        if  (bind(listener, &a.addr, (int) sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
 
         memset(&a, 0, sizeof(a));
@@ -118,7 +118,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
         socks[0] = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, flags);
         if (socks[0] == INVALID_SOCKET)
             break;
-        if (connect(socks[0], &a.addr, sizeof(a.inaddr)) == SOCKET_ERROR)
+        if (connect(socks[0], &a.addr, (int) sizeof(a.inaddr)) == SOCKET_ERROR)
             break;
 
         socks[1] = accept(listener, NULL, NULL);
@@ -134,7 +134,7 @@ int dumb_socketpair(SOCKET socks[2], int make_overlapped)
     closesocket(socks[0]);
     closesocket(socks[1]);
     WSASetLastError(e);
-    socks[0] = socks[1] = -1;
+    socks[0] = socks[1] = INVALID_SOCKET;
     return SOCKET_ERROR;
 }
 #else

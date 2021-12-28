@@ -1,5 +1,6 @@
 typedef void* SOCKET;
 typedef unsigned int DWORD;
+typedef unsigned int GROUP;
 #define WSA_FLAG_OVERLAPPED 1
 extern void WSASetLastError(int);
 extern int WSAGetLastError();
@@ -8,7 +9,7 @@ extern int WSAGetLastError();
 #define AF_INET 33
 #define SOCK_STREAM 44
 #define IPPROTO_TCP 55
-#define INVALID_SOCKET 0
+#define INVALID_SOCKET (SOCKET)(~0)
 extern void* socket(int, int, int);
 struct sockaddr_in {
     int sin_family;
@@ -16,16 +17,15 @@ struct sockaddr_in {
     unsigned short sin_port;
 };
 struct sockaddr { int dummy; };
-typedef unsigned socklen_t;
 #define SOL_SOCKET 66
 #define SO_REUSEADDR 77
 #define INADDR_LOOPBACK 88
-extern int setsockopt(SOCKET, int, int, char*, unsigned);
-extern int bind(SOCKET, struct sockaddr*, unsigned);
-extern int getsockname(SOCKET, struct sockaddr*, socklen_t*);
+extern int setsockopt(SOCKET, int, int, const char*, int);
+extern int bind(SOCKET, const struct sockaddr*, int);
+extern int getsockname(SOCKET, struct sockaddr*, int*);
 extern int listen(SOCKET, int);
-extern SOCKET WSASocket(int, int, int, void*, int, int);
-extern int connect(SOCKET, struct sockaddr*, unsigned);
-extern SOCKET accept(SOCKET, void*, void*);
+extern SOCKET WSASocket(int, int, int, void*, GROUP, DWORD);
+extern int connect(SOCKET, const struct sockaddr*, int);
+extern SOCKET accept(SOCKET, struct sockaddr*, int*);
 extern int closesocket(SOCKET);
-extern unsigned htonl(unsigned);
+extern unsigned long htonl(unsigned long);
