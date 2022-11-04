@@ -26,6 +26,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /* Changes:
+ * 2022-11-04: align types of arguments and return value of Windows Sockets 2
+ *             functions with Muicrosoft documentation
  * 2014-02-12: merge David Woodhouse, Ger Hobbelt improvements
  *     git.infradead.org/users/dwmw2/openconnect.git/commitdiff/bdeefa54
  *     github.com/GerHobbelt/selectable-socketpair
